@@ -1,0 +1,20 @@
+// src/app/layout.tsx
+import "./globals.css";
+
+export const metadata = {
+  title: "Dynamic QR Manager",
+  description: "QR Generator App",
+  manifest: "/manifest.json",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}
