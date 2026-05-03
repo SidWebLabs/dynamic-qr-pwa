@@ -1,10 +1,12 @@
 {
-    "name": "Dynamic QR Manager",
-    "short_name": "QR Manager",
+    "name": "QR Pay Manager",
+    "short_name": "QR Pay",
+    "description": "Generate & manage UPI payment QR codes",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#16a34a",
+    "background_color": "#f0f4ff",
+    "theme_color": "#0e2060",
+    "orientation": "portrait",
     "icons": [
         {
             "src": "/icon-192.png",
