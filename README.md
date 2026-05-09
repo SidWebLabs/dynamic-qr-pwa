@@ -38,3 +38,4 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 ## Need to add
 install pwa not shown in mobile please check im not getting the option to install and we need to download option there and json file should be dowloaded there should be option to excel and json also option to upload the data and it should store also we need to add pagination here.
+also need to change the logo make it QR Pay also check the pwa
