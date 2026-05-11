@@ -1,5 +1,5 @@
 {
-    "name": "QR Pay Manager",
+    "name": "QR Pay",
     "short_name": "QR Pay",
     "description": "Generate & manage UPI payment QR codes",
     "start_url": "/",
@@ -9,12 +9,12 @@
     "orientation": "portrait",
     "icons": [
         {
-            "src": "/icon-192.png",
+            "src": "/QR_Pay.png",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "/icon-512.png",
+            "src": "/QR_Pay.png",
             "sizes": "512x512",
             "type": "image/png"
         }
