@@ -16,9 +16,21 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "QR Pay Manager",
+  title: "QR Pay",
   description: "Generate & manage UPI payment QR codes",
   manifest: "/manifest.json",
+
+  icons: {
+    icon: "/QR_Pay.png",
+    shortcut: "/QR_Pay.png",
+    apple: "/QR_Pay.png",
+  },
+
+  openGraph: {
+    title: "QR Pay",
+    description: "Generate & manage UPI payment QR codes",
+    images: ["/QR_PAy.png"],
+  },
 };
 
 export const viewport: Viewport = {
@@ -27,13 +39,16 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" className={`${sora.variable} ${dmSans.variable}`}>
-      <body className="bg-[#f0f4ff] min-h-screen" style={{ fontFamily: "var(--font-dm), sans-serif" }}>
-        <Navbar />
-        <main className="">{children}</main>
-      </body>
-    </html>
+      <body
+        className="bg-[#f0f4ff] min-h-screen"
+        style={{ fontFamily: "var(--font-dm), sans-serif" }}
+      > <Navbar /> <main>{children}</main> </body> </html>
   );
 }
