@@ -51,7 +51,7 @@ export default function Drawer({ open, onClose }: DrawerProps) {
                             <RiQrCodeLine size={18} color="white" />
                         </div>
                         <span className="text-white font-bold text-base tracking-tight" style={{ fontFamily: "var(--font-sora)" }}>
-                            QR Generator
+                            QR Pay
                         </span>
                     </div>
                     <button onClick={onClose} className="text-white/60 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors">

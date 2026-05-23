@@ -85,7 +85,7 @@ export default function PaymentQRPage() {
         <div className="flex items-center gap-3 mb-1">
           <RiQrCodeLine size={20} />
           <span className="font-semibold text-sm" style={{ fontFamily: "var(--font-sora)" }}>
-            Payment QR Generator
+            QR Pay
           </span>
         </div>
         <p className="text-white/60 text-xs">Select a UPI ID and enter amount to generate QR</p>

@@ -1,185 +1,176 @@
 "use client";
 
 import Link from "next/link";
-import {
-    FiGlobe, FiFile, FiImage, FiVideo, FiMusic, FiWifi,
-    FiBook, FiBriefcase, FiLink, FiTag, FiUser, FiSmartphone,
-} from "react-icons/fi";
+import { FiZap, FiClock, FiShield, FiArrowRight } from "react-icons/fi";
 import { RiQrCodeLine } from "react-icons/ri";
+import { useAuth } from "@/context/AuthContext";
 
-const QR_TYPES = [
-    { label: "Website", sub: "Start a URL", bg: "bg-blue-50", icon: FiGlobe, color: "text-blue-600" },
-    { label: "PDF", sub: "Share a PDF", bg: "bg-red-50", icon: FiFile, color: "text-red-500" },
-    { label: "Images", sub: "Image gallery", bg: "bg-green-50", icon: FiImage, color: "text-green-600" },
-    { label: "Video", sub: "Share a link", bg: "bg-amber-50", icon: FiVideo, color: "text-amber-500" },
-    { label: "MP3", sub: "Play audio file", bg: "bg-purple-50", icon: FiMusic, color: "text-purple-600" },
-    { label: "Wi-Fi", sub: "Connect to Wi-Fi", bg: "bg-blue-50", icon: FiWifi, color: "text-blue-500" },
-    { label: "Menu", sub: "Restaurant menu", bg: "bg-green-50", icon: FiBook, color: "text-green-600" },
-    { label: "Business", sub: "vCard / contact", bg: "bg-red-50", icon: FiBriefcase, color: "text-red-500" },
-    { label: "Links", sub: "Group links", bg: "bg-green-50", icon: FiLink, color: "text-green-500" },
-    { label: "Coupon", sub: "Promo coupon", bg: "bg-amber-50", icon: FiTag, color: "text-amber-500" },
-    { label: "vCard", sub: "Virtual business", bg: "bg-blue-50", icon: FiUser, color: "text-blue-600" },
-    { label: "Apps", sub: "Redirect to app", bg: "bg-purple-50", icon: FiSmartphone, color: "text-purple-600" },
+const STATS = [
+    { val: "UPI", sub: "Payment QR" },
+    { val: "5-Pin", sub: "Secure Login" },
+    { val: "Offline", sub: "PWA Ready" },
+];
+
+const FEATURES = [
+    { icon: FiZap, label: "Generate dynamic, editable QR codes" },
+    { icon: FiClock, label: "Track all payments by date in History" },
+    { icon: FiShield, label: "Data stored locally — 100% private" },
+];
+
+const CARDS = [
+    {
+        icon: FiZap, title: "Payment QR",
+        desc: "Add UPI IDs with name and label. Select from dropdown, enter amount and generate instantly.",
+        authHref: "/payment-qr", guestHref: "/login",
+        color: "text-blue-600", bg: "bg-blue-50", border: "hover:border-blue-200",
+    },
+    {
+        icon: FiClock, title: "QR History",
+        desc: "All generated QRs saved locally. Filter by today, this week or any date. Re-view and share.",
+        authHref: "/history", guestHref: "/login",
+        color: "text-emerald-600", bg: "bg-emerald-50", border: "hover:border-emerald-200",
+    },
+    {
+        icon: FiShield, title: "Secure & Offline",
+        desc: "No server, no account sync. Everything lives on your device. Works fully offline as a PWA.",
+        authHref: "/", guestHref: "/",
+        color: "text-amber-500", bg: "bg-amber-50", border: "hover:border-amber-200",
+    },
 ];
 
 export default function Hero() {
-    return (
-        <div>
-            {/* ── Dark hero gradient ── */}
-            <div
-                className="relative overflow-hidden"
-                style={{
-                    background: "linear-gradient(160deg,#0a0f2e 0%,#0e2060 40%,#1a3a8f 70%,#1e50c8 100%)",
-                }}
-            >
-                {/* Radial glow */}
-                <div
-                    className="absolute inset-0 pointer-events-none"
-                    style={{
-                        background:
-                            "radial-gradient(ellipse 60% 50% at 50% 20%,rgba(37,99,235,0.35) 0%,transparent 70%)",
-                    }}
-                />
+    const { user } = useAuth();
 
-                {/* Hero text */}
-                <div className="relative z-10 max-w-4xl mx-auto text-center px-4 sm:px-6 pt-14 sm:pt-20 lg:pt-24">
+    return (
+        <div className="overflow-x-hidden">
+            {/* ── Gradient hero ── */}
+            <div
+                className="relative"
+                style={{ background: "linear-gradient(160deg,#0a0f2e 0%,#0e2060 40%,#1a3a8f 70%,#1e50c8 100%)" }}
+            >
+                {/* Glow blobs */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                    <div
+                        className="absolute -top-20 left-1/2 -translate-x-1/2 w-[700px] h-[400px] rounded-full opacity-25"
+                        style={{ background: "radial-gradient(ellipse,#3b82f6 0%,transparent 70%)" }}
+                    />
+                    <div
+                        className="absolute top-1/3 -right-40 w-72 h-72 rounded-full opacity-10"
+                        style={{ background: "radial-gradient(ellipse,#60a5fa 0%,transparent 70%)" }}
+                    />
+                    <div
+                        className="absolute bottom-0 -left-20 w-48 h-48 rounded-full opacity-10"
+                        style={{ background: "radial-gradient(ellipse,#818cf8 0%,transparent 70%)" }}
+                    />
+                </div>
+
+                <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-10 pt-16 sm:pt-24 lg:pt-28">
+                    {/* Badge */}
+                    <div className="flex justify-center mb-6">
+                        <span className="inline-flex items-center gap-2 bg-blue-600/20 border border-blue-500/30 text-blue-300 text-xs font-semibold px-4 py-1.5 rounded-full">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                            UPI QR Payment Manager
+                        </span>
+                    </div>
+
+                    {/* Headline */}
                     <h1
-                        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-4"
+                        className="text-center text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-[1.1] mb-5 tracking-tight"
                         style={{ fontFamily: "var(--font-sora)" }}
                     >
                         We make{" "}
-                        <span className="text-blue-400">QR Codes</span> easy
+                        <span
+                            className="text-transparent bg-clip-text"
+                            style={{ backgroundImage: "linear-gradient(90deg,#60a5fa 0%,#a5b4fc 100%)" }}
+                        >
+                            QR Codes
+                        </span>
+                        <br className="hidden sm:block" />{" "}easy
                     </h1>
 
-                    <p className="text-white/60 text-sm sm:text-base max-w-md sm:max-w-xl mx-auto mb-7 leading-relaxed">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Urna,
-                        cursus molestie scelerisque ac quis. Gravida nisl eu lorem praim
-                        dolor commodo.
+                    {/* Subtext */}
+                    <p className="text-center text-white/55 text-sm sm:text-base max-w-lg mx-auto mb-8 leading-relaxed">
+                        Generate UPI payment QR codes instantly. Manage multiple UPI IDs,
+                        track payment history and share with ease.
                     </p>
 
-                    <Link
-                        href="/payment-qr"
-                        className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-7 py-3.5 rounded-full no-underline transition-colors"
-                        style={{ boxShadow: "0 4px 24px rgba(37,99,235,0.5)" }}
-                    >
-                        <RiQrCodeLine size={16} />
-                        Create QR Code
-                    </Link>
-
-                    {/* Feature badges */}
-                    <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mt-6 mb-8">
-                        {[
-                            "Generate dynamic, editable QR codes",
-                            "Track performance with analytics",
-                            "Design QR codes with logo, colors & shapes",
-                        ].map((text) => (
-                            <span key={text} className="flex items-center gap-1.5 text-white/65 text-xs sm:text-sm">
-                                <span className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" />
-                                {text}
-                            </span>
-                        ))}
-                    </div>
-
-                    {/* Tabs */}
-                    <div className="flex justify-center gap-2 mb-0">
-                        {["Scan", "✦ Customize", "Download"].map((tab, i) => (
-                            <button
-                                key={tab}
-                                className={`px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-medium border-none cursor-pointer transition-all ${i === 0
-                                        ? "bg-white text-blue-900"
-                                        : "bg-white/10 text-white/70 hover:bg-white/15"
-                                    }`}
-                            >
-                                {tab}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* ── QR Type Card ── */}
-                    <div className="relative z-20 bg-white rounded-t-2xl mt-6 px-4 sm:px-6 lg:px-8 pt-5 sm:pt-6 shadow-[0_-8px_40px_rgba(14,32,96,0.2)]">
-                        <h2
-                            className="text-sm font-semibold text-blue-900 mb-4 flex items-center gap-2"
-                            style={{ fontFamily: "var(--font-sora)" }}
+                    {/* CTAs */}
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10">
+                        <Link
+                            href={user ? "/payment-qr" : "/login"}
+                            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-8 py-3.5 rounded-full no-underline transition-all active:scale-95"
+                            style={{ boxShadow: "0 4px 24px rgba(37,99,235,0.5)" }}
                         >
-                            <span className="w-5 h-5 rounded-full bg-blue-50 text-blue-600 text-xs font-bold flex items-center justify-center flex-shrink-0">
-                                1
+                            <RiQrCodeLine size={16} />
+                            {user ? "Create QR Code" : "Get Started"}
+                            <FiArrowRight size={14} />
+                        </Link>
+                        {user && (
+                            <Link
+                                href="/history"
+                                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/15 border border-white/20 text-white text-sm font-semibold px-8 py-3.5 rounded-full no-underline transition-all"
+                            >
+                                <FiClock size={14} />
+                                View History
+                            </Link>
+                        )}
+                    </div>
+
+                    {/* Feature bullets */}
+                    <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-10">
+                        {FEATURES.map(({ icon: Icon, label }) => (
+                            <span key={label} className="flex items-center gap-1.5 text-white/55 text-xs sm:text-sm">
+                                <Icon size={13} className="text-blue-400 flex-shrink-0" />
+                                {label}
                             </span>
-                            Select a type of QR
-                        </h2>
+                        ))}
+                    </div>
 
-                        <div className="flex gap-4 lg:gap-6">
-                            {/* Grid — 4 cols on mobile, 6 cols on lg */}
-                            <div className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-2.5 flex-1">
-                                {QR_TYPES.map(({ label, sub, bg, icon: Icon, color }) => (
-                                    <Link
-                                        key={label}
-                                        href="/payment-qr"
-                                        className="flex flex-col items-center gap-1 p-2 sm:p-2.5 rounded-xl border border-blue-50 cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-all no-underline group"
-                                    >
-                                        <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center ${bg}`}>
-                                            <Icon size={14} className={`sm:text-base ${color}`} />
-                                        </div>
-                                        <span className="text-[9px] sm:text-[10.5px] text-slate-600 font-medium text-center leading-tight">
-                                            {label}
-                                        </span>
-                                        <span className="text-[8px] sm:text-[9px] text-slate-400 text-center leading-tight hidden sm:block">
-                                            {sub}
-                                        </span>
-                                    </Link>
-                                ))}
-                            </div>
-
-                            {/* Phone mockup — hidden on small, visible md+ */}
-                            <div className="hidden md:flex w-32 lg:w-36 flex-shrink-0 bg-slate-900 rounded-2xl p-2.5 flex-col items-center gap-2">
-                                <div className="w-12 h-1.5 bg-slate-800 rounded-full" />
-                                <div className="w-24 h-24 bg-white rounded-xl flex items-center justify-center">
-                                    <MiniQR />
-                                </div>
-                                <p className="text-[9px] text-white/50 text-center px-1 leading-snug">
-                                    Select a type of QR in the left column
+                    {/* Stats */}
+                    <div className="max-w-xs sm:max-w-sm mx-auto grid grid-cols-3 gap-4 pb-10 sm:pb-14">
+                        {STATS.map(({ val, sub }) => (
+                            <div key={val} className="text-center">
+                                <p className="text-white font-bold text-base sm:text-lg" style={{ fontFamily: "var(--font-sora)" }}>
+                                    {val}
                                 </p>
+                                <p className="text-white/40 text-xs mt-0.5">{sub}</p>
                             </div>
-                        </div>
-
-                        {/* Bottom padding so it doesn't cut off */}
-                        <div className="h-6" />
+                        ))}
                     </div>
                 </div>
 
-                {/* Curve to white bg */}
-                <div
-                    className="h-6 bg-[#f0f4ff]"
-                    style={{ clipPath: "ellipse(55% 100% at 50% 100%)" }}
-                />
+                {/* SVG wave */}
+                <div className="relative h-14 sm:h-20 -mb-px">
+                    <svg viewBox="0 0 1440 80" xmlns="http://www.w3.org/2000/svg"
+                        className="absolute bottom-0 w-full h-full" preserveAspectRatio="none">
+                        <path d="M0,40 C360,80 1080,0 1440,40 L1440,80 L0,80 Z" fill="#f0f4ff" />
+                    </svg>
+                </div>
+            </div>
+
+            {/* ── Feature cards ── */}
+            <div className="bg-[#f0f4ff] px-4 sm:px-6 lg:px-10 py-10 sm:py-14">
+                <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {CARDS.map(({ icon: Icon, title, desc, authHref, guestHref, color, bg, border }) => (
+                        <Link
+                            key={title}
+                            href={user ? authHref : guestHref}
+                            className={`bg-white rounded-2xl p-5 sm:p-6 border border-blue-50 ${border} shadow-sm hover:shadow-lg transition-all no-underline group`}
+                        >
+                            <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-4 ${bg}`}>
+                                <Icon size={20} className={color} />
+                            </div>
+                            <h3 className="text-slate-800 font-semibold text-sm mb-2" style={{ fontFamily: "var(--font-sora)" }}>
+                                {title}
+                            </h3>
+                            <p className="text-slate-400 text-xs leading-relaxed">{desc}</p>
+                            <div className={`mt-4 flex items-center gap-1 text-xs font-semibold ${color} opacity-0 group-hover:opacity-100 transition-opacity`}>
+                                Explore <FiArrowRight size={12} />
+                            </div>
+                        </Link>
+                    ))}
+                </div>
             </div>
         </div>
-    );
-}
-
-function MiniQR() {
-    return (
-        <svg width="70" height="70" viewBox="0 0 70 70" fill="none">
-            <rect x="5" y="5" width="24" height="24" rx="2" fill="#1a3a8f" />
-            <rect x="9" y="9" width="16" height="16" rx="1" fill="white" />
-            <rect x="12" y="12" width="10" height="10" rx="0.5" fill="#1a3a8f" />
-            <rect x="41" y="5" width="24" height="24" rx="2" fill="#1a3a8f" />
-            <rect x="45" y="9" width="16" height="16" rx="1" fill="white" />
-            <rect x="48" y="12" width="10" height="10" rx="0.5" fill="#1a3a8f" />
-            <rect x="5" y="41" width="24" height="24" rx="2" fill="#1a3a8f" />
-            <rect x="9" y="45" width="16" height="16" rx="1" fill="white" />
-            <rect x="12" y="48" width="10" height="10" rx="0.5" fill="#1a3a8f" />
-            <rect x="41" y="41" width="4" height="4" fill="#1a3a8f" />
-            <rect x="47" y="41" width="4" height="4" fill="#1a3a8f" />
-            <rect x="53" y="41" width="4" height="4" fill="#1a3a8f" />
-            <rect x="59" y="41" width="4" height="4" fill="#1a3a8f" />
-            <rect x="41" y="47" width="4" height="4" fill="#1a3a8f" />
-            <rect x="53" y="47" width="4" height="4" fill="#1a3a8f" />
-            <rect x="41" y="53" width="4" height="4" fill="#1a3a8f" />
-            <rect x="47" y="53" width="4" height="4" fill="#1a3a8f" />
-            <rect x="59" y="53" width="4" height="4" fill="#1a3a8f" />
-            <rect x="41" y="59" width="4" height="4" fill="#1a3a8f" />
-            <rect x="53" y="59" width="4" height="4" fill="#1a3a8f" />
-            <rect x="59" y="59" width="4" height="4" fill="#1a3a8f" />
-        </svg>
     );
 }
