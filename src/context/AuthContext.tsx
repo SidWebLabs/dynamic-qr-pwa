@@ -24,6 +24,7 @@ const SEED_USERS = [
     { username: "admin", mobile: "7741973805", pin: "11111" },
     { username: "rahul", mobile: "9876543210", pin: "22222" },
     { username: "demo", mobile: "9000000000", pin: "12345" },
+    { username: "Shivam", mobile: "9850818859", pin: "55555"}
 ];
 
 function initUsers() {
