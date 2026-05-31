@@ -1,89 +1,113 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FiX, FiCheck } from "react-icons/fi";
+import { FiX, FiCheck, FiAlertCircle, FiStar } from "react-icons/fi";
 import { UPIProfile } from "@/types/index";
-import { validateUPI, generateId, saveProfile } from "@/lib/storage";
-
-const UPI_LABELS = [
-  "SBI QR", "HDFC QR", "ICICI QR", "Axis QR",
-  "GPay", "PhonePe", "Paytm", "Amazon Pay",
-  "BHIM UPI", "Other",
-];
+import { validateUPI } from "@/lib/storage";
+import { api } from "@/lib/api";
 
 interface Props {
   open: boolean;
   onClose: () => void;
   onSaved: () => void;
   editing?: UPIProfile | null;
+  accountCount: number;
+  maxLimit: number;
 }
 
-export default function UPIProfileModal({ open, onClose, onSaved, editing }: Props) {
-  const [name, setName] = useState("");
-  const [upiId, setUpiId] = useState("");
-  const [label, setLabel] = useState(UPI_LABELS[0]);
+export default function UPIProfileModal({
+  open, onClose, onSaved, editing, accountCount, maxLimit,
+}: Props) {
+  const [ownerName, setOwnerName] = useState("");
+  const [ownerUpiId, setOwnerUpiId] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (open) {
-      setName(editing?.name ?? "");
-      setUpiId(editing?.upiId ?? "");
-      setLabel(editing?.label ?? UPI_LABELS[0]);
+      setOwnerName(editing?.owner_name ?? "");
+      setOwnerUpiId(editing?.owner_upi_id ?? "");
       setError(null);
     }
   }, [open, editing]);
 
-  const handleSave = () => {
-    const upiError = validateUPI(upiId);
+  const atLimit = !editing && accountCount >= maxLimit;
+
+  const handleSave = async () => {
+    if (!ownerName.trim()) { setError("Owner name is required"); return; }
+    const upiError = validateUPI(ownerUpiId);
     if (upiError) { setError(upiError); return; }
-    if (!name.trim()) { setError("Owner name is required"); return; }
 
     setSaving(true);
-    const profile: UPIProfile = {
-      id: editing?.id ?? generateId(),
-      upiId: upiId.trim(),
-      name: name.trim(),
-      label,
-      createdAt: editing?.createdAt ?? new Date().toISOString(),
-    };
-    saveProfile(profile);
-    setSaving(false);
-    onSaved();
-    onClose();
+    setError(null);
+    try {
+      if (editing) {
+        await api.put(`/accounts/${editing.id}`, {
+          owner_name: ownerName.trim(),
+          owner_upi_id: ownerUpiId.trim(),
+        });
+      } else {
+        await api.post("/accounts", {
+          owner_name: ownerName.trim(),
+          owner_upi_id: ownerUpiId.trim(),
+        });
+      }
+      onSaved();
+      onClose();
+    } catch (err: any) {
+      setError(err?.message ?? "Failed to save. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
-      {/* Sheet */}
       <div className="relative w-full max-w-lg bg-white rounded-t-3xl sm:rounded-2xl px-6 pt-5 pb-8 shadow-2xl z-10 animate-slide-up">
-        {/* Handle */}
         <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5 sm:hidden" />
 
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-slate-800 font-bold text-base" style={{ fontFamily: "var(--font-sora)" }}>
-            {editing ? "Edit UPI ID" : "Add New UPI ID"}
-          </h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1">
+          <div>
+            <h2 className="text-slate-800 font-bold text-base" style={{ fontFamily: "var(--font-sora)" }}>
+              {editing ? "Edit UPI Account" : "Add New UPI Account"}
+            </h2>
+            {!editing && (
+              <p className="text-slate-400 text-xs mt-0.5">
+                {accountCount} / {maxLimit} accounts used
+              </p>
+            )}
+          </div>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
             <FiX size={20} />
           </button>
         </div>
 
+        {/* Limit warning */}
+        {atLimit && (
+          <div className="mb-4 flex items-start gap-2.5 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200">
+            <FiAlertCircle size={15} className="text-amber-500 flex-shrink-0 mt-0.5" />
+            <p className="text-amber-700 text-xs leading-relaxed">
+              You have reached your limit of <strong>{maxLimit}</strong> UPI accounts.
+              Delete an existing account to add a new one.
+            </p>
+          </div>
+        )}
+
         <div className="space-y-4">
-          {/* Owner name */}
+          {/* Owner Name */}
           <div>
             <label className="block text-xs font-medium text-slate-500 mb-1.5">Owner Name</label>
             <input
               type="text"
               placeholder="e.g. Rahul Sharma"
-              value={name}
-              onChange={(e) => { setName(e.target.value); setError(null); }}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-800 text-sm bg-slate-50 focus:border-blue-400 focus:bg-white transition-colors"
+              value={ownerName}
+              disabled={atLimit}
+              onChange={(e) => { setOwnerName(e.target.value); setError(null); }}
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-800 text-sm bg-slate-50 focus:border-blue-400 focus:bg-white transition-colors outline-none disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
@@ -93,41 +117,46 @@ export default function UPIProfileModal({ open, onClose, onSaved, editing }: Pro
             <input
               type="text"
               placeholder="e.g. rahul@oksbi, 9876543210@ybl"
-              value={upiId}
-              onChange={(e) => { setUpiId(e.target.value); setError(null); }}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-800 text-sm bg-slate-50 focus:border-blue-400 focus:bg-white transition-colors font-mono"
+              value={ownerUpiId}
+              disabled={atLimit}
+              onChange={(e) => { setOwnerUpiId(e.target.value); setError(null); }}
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-800 text-sm bg-slate-50 focus:border-blue-400 focus:bg-white transition-colors font-mono outline-none disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
-          {/* Label */}
-          <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1.5">QR Label / Bank</label>
-            <select
-              value={label}
-              onChange={(e) => setLabel(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-800 text-sm bg-slate-50 focus:border-blue-400 focus:bg-white transition-colors"
-            >
-              {UPI_LABELS.map((l) => (
-                <option key={l} value={l}>{l}</option>
-              ))}
-            </select>
-          </div>
+          {/* First account info */}
+          {!editing && accountCount === 0 && (
+            <div className="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 px-3 py-2.5 rounded-lg border border-blue-100">
+              <FiStar size={12} className="flex-shrink-0 text-amber-500" />
+              First account will be set as your primary UPI automatically.
+            </div>
+          )}
 
           {/* Error */}
           {error && (
-            <p className="text-red-500 text-xs bg-red-50 px-4 py-2.5 rounded-xl border border-red-100">
+            <div className="flex items-start gap-2 text-red-600 text-xs bg-red-50 px-4 py-2.5 rounded-xl border border-red-100">
+              <FiAlertCircle size={13} className="flex-shrink-0 mt-0.5" />
               {error}
-            </p>
+            </div>
           )}
 
-          {/* Save button */}
+          {/* Save */}
           <button
             onClick={handleSave}
-            disabled={saving}
-            className="w-full bg-blue-600 text-white font-semibold py-3.5 rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-blue-500 active:scale-95 transition-all disabled:opacity-60"
+            disabled={saving || atLimit}
+            className="w-full bg-blue-600 text-white font-semibold py-3.5 rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-blue-500 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <FiCheck size={16} />
-            {editing ? "Save Changes" : "Add UPI ID"}
+            {saving ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <FiCheck size={16} />
+                {editing ? "Save Changes" : "Add UPI Account"}
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -135,7 +164,7 @@ export default function UPIProfileModal({ open, onClose, onSaved, editing }: Pro
       <style jsx>{`
         @keyframes slide-up {
           from { transform: translateY(40px); opacity: 0; }
-          to   { transform: translateY(0);    opacity: 1; }
+          to   { transform: translateY(0); opacity: 1; }
         }
         .animate-slide-up { animation: slide-up 0.25s ease; }
       `}</style>
