@@ -72,7 +72,7 @@ export default function HistoryPage() {
   );
 
   const handleView = (r: QRRecord) => {
-    setViewUpi(buildUPIString(r.upiId, r.name, r.amount, r.note));
+    setViewUpi(buildUPIString(r.owner_upi_id, r.owner_name, r.amount, r.note));
     setViewing(r);
   };
 
@@ -186,7 +186,7 @@ export default function HistoryPage() {
                 {/* Mini QR preview */}
                 <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0 p-1.5">
                   <QRCode
-                    value={buildUPIString(r.upiId, r.name, r.amount, r.note)}
+                    value={buildUPIString(r.owner_upi_id, r.owner_name, r.amount, r.note)}
                     size={36}
                     fgColor="#1a3a8f"
                     bgColor="transparent"
@@ -196,13 +196,10 @@ export default function HistoryPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <p className="text-slate-800 font-semibold text-sm truncate" style={{ fontFamily: "var(--font-sora)" }}>
-                      {r.name}
+                      {r.owner_name}
                     </p>
-                    <span className="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-md font-medium flex-shrink-0">
-                      {r.label}
-                    </span>
                   </div>
-                  <p className="text-slate-400 text-xs font-mono truncate">{r.upiId}</p>
+                  <p className="text-slate-400 text-xs font-mono truncate">{r.owner_upi_id}</p>
                   {r.note && (
                     <p className="text-slate-300 text-xs truncate mt-0.5">{r.note}</p>
                   )}
