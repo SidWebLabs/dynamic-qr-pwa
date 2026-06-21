@@ -252,10 +252,10 @@ function LoginForm() {
               New user? To register, please contact us on
             </p>
             <a
-              href="tel:7741973805"
+              href="tel:9850818859"
               className="inline-flex items-center gap-2 mt-2 text-blue-400 hover:text-blue-300 font-semibold text-sm transition-colors no-underline"
             >
-              <FiPhone size={14} /> +91 77419 73805
+              <FiPhone size={14} /> +91 9850818859
             </a>
           </div>
         </div>

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { FiPlus, FiEdit2, FiTrash2, FiZap, FiChevronDown, FiStar } from "react-icons/fi";
 import { RiQrCodeLine } from "react-icons/ri";
 import { UPIProfile, QRRecord } from "@/types/index";
-import { saveQRRecord, buildUPIString, generateId } from "@/lib/storage";
+import { buildUPIString } from "@/lib/storage";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import UPIProfileModal from "@/components/ui/UPIProfileModal";
@@ -19,6 +19,7 @@ export default function PaymentQRPage() {
   const [note, setNote] = useState("");
   const [amountError, setAmountError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<UPIProfile | null>(null);
@@ -26,14 +27,12 @@ export default function PaymentQRPage() {
   const [qrRecord, setQrRecord] = useState<QRRecord | null>(null);
   const [qrString, setQrString] = useState("");
 
-  // ── Fetch accounts from API ───────────────────────────────
   const reload = useCallback(async () => {
     try {
       setLoading(true);
       const res = await api.get<UPIProfile[]>("/accounts");
       const list = res.data ?? [];
       setProfiles(list);
-      // Auto-select primary, or first
       if (list.length > 0 && !selectedId) {
         const primary = list.find((p) => p.is_primary) ?? list[0];
         setSelectedId(String(primary.id));
@@ -49,8 +48,7 @@ export default function PaymentQRPage() {
 
   const selectedProfile = profiles.find((p) => String(p.id) === selectedId);
 
-  // ── Generate QR ───────────────────────────────────────────
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     const val = parseFloat(amount);
     if (!amount || isNaN(val) || val <= 0) {
       setAmountError("Enter a valid amount greater than ₹0");
@@ -61,23 +59,30 @@ export default function PaymentQRPage() {
       return;
     }
 
-    const upiStr = buildUPIString(selectedProfile.owner_upi_id, selectedProfile.owner_name, val, note);
-    const record: QRRecord = {
-      id: generateId(),
-      upiProfileId: String(selectedProfile.id),
-      owner_upi_id: selectedProfile.owner_upi_id,
-      owner_name: selectedProfile.owner_name,
-      amount: val,
-      note: note.trim(),
-      generatedAt: new Date().toISOString(),
-    };
-    saveQRRecord(record);
-    setQrString(upiStr);
-    setQrRecord(record);
+    setGenerating(true);
     setAmountError(null);
+
+    try {
+      const res = await api.post<QRRecord>("/history", {
+        account_id: Number(selectedProfile.id),
+        amount: val,
+        note: note.trim(),
+      });
+
+      const record = res.data!;
+      const upiStr = buildUPIString(record.owner_upi_id, record.owner_name, val, note.trim());
+
+      setQrString(upiStr);
+      setQrRecord(record);
+      setAmount("");
+      setNote("");
+    } catch (err: any) {
+      setAmountError(err?.message ?? "Failed to generate QR. Please try again.");
+    } finally {
+      setGenerating(false);
+    }
   };
 
-  // ── Delete account via API ────────────────────────────────
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this UPI account?")) return;
     try {
@@ -151,7 +156,6 @@ export default function PaymentQRPage() {
           </div>
         ) : (
           <>
-            {/* Dropdown */}
             <div className="relative mb-3">
               <select
                 value={selectedId}
@@ -167,7 +171,6 @@ export default function PaymentQRPage() {
               <FiChevronDown size={15} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             </div>
 
-            {/* Selected profile card */}
             {selectedProfile && (
               <div className="bg-blue-50 rounded-xl px-4 py-3 flex items-center justify-between">
                 <div>
@@ -222,8 +225,8 @@ export default function PaymentQRPage() {
                   key={p.id}
                   onClick={() => setSelectedId(String(p.id))}
                   className={`flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-all ${active
-                      ? "bg-blue-600 text-white"
-                      : "bg-slate-50 hover:bg-blue-50 border border-transparent hover:border-blue-100"
+                    ? "bg-blue-600 text-white"
+                    : "bg-slate-50 hover:bg-blue-50 border border-transparent hover:border-blue-100"
                     }`}
                 >
                   <div className="min-w-0">
@@ -309,11 +312,20 @@ export default function PaymentQRPage() {
 
         <button
           onClick={handleGenerate}
-          disabled={!selectedProfile || !amount}
+          disabled={!selectedProfile || !amount || generating}
           className="w-full bg-blue-600 text-white font-semibold py-4 rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-blue-500 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-blue-200"
         >
-          <FiZap size={16} />
-          Generate QR Code
+          {generating ? (
+            <>
+              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              Generating...
+            </>
+          ) : (
+            <>
+              <FiZap size={16} />
+              Generate QR Code
+            </>
+          )}
         </button>
       </div>
 

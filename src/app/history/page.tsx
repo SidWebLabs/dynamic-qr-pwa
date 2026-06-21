@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import QRCode from "react-qr-code";
-import { FiCalendar, FiTrash2, FiFilter, FiClock, FiChevronDown } from "react-icons/fi";
+import { FiCalendar, FiTrash2, FiFilter, FiClock } from "react-icons/fi";
 import { RiQrCodeLine } from "react-icons/ri";
 import { QRRecord } from "@/types/index";
-import { getHistory, deleteQRRecord, buildUPIString } from "@/lib/storage";
+import { buildUPIString } from "@/lib/storage";
+import { api } from "@/lib/api";
 import QRDisplayModal from "@/components/ui/QRDisplayModal";
 
 type FilterMode = "all" | "today" | "week" | "custom";
@@ -22,64 +23,61 @@ function formatTime(iso: string) {
   });
 }
 
-function isSameDay(a: Date, b: Date) {
-  return a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate();
-}
-
 export default function HistoryPage() {
   const [history, setHistory] = useState<QRRecord[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterMode>("all");
   const [customDate, setCustomDate] = useState("");
   const [viewing, setViewing] = useState<QRRecord | null>(null);
   const [viewUpi, setViewUpi] = useState("");
 
-  const reload = () => setHistory(getHistory());
-  useEffect(() => { reload(); }, []);
+  const reload = useCallback(async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams();
+      if (filter !== "all") params.set("filter", filter);
+      if (filter === "custom" && customDate) params.set("date", customDate);
 
-  const filtered = useMemo(() => {
-    const now = new Date();
-    return history.filter((r) => {
-      const d = new Date(r.generatedAt);
-      if (filter === "today") return isSameDay(d, now);
-      if (filter === "week") {
-        const weekAgo = new Date(now);
-        weekAgo.setDate(now.getDate() - 7);
-        return d >= weekAgo;
-      }
-      if (filter === "custom" && customDate) {
-        return isSameDay(d, new Date(customDate));
-      }
-      return true;
-    });
-  }, [history, filter, customDate]);
+      const res = await api.get<QRRecord[]>(`/history?${params.toString()}`);
+      setHistory(res.data ?? []);
+    } catch (err) {
+      console.error("Failed to load history", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [filter, customDate]);
 
-  // Group by date
+  useEffect(() => { reload(); }, [reload]);
+
+  // Group by date (client-side, after server filter)
   const grouped = useMemo(() => {
     const map: Record<string, QRRecord[]> = {};
-    filtered.forEach((r) => {
-      const key = formatDate(r.generatedAt);
+    history.forEach((r) => {
+      const key = formatDate(r.created_on);
       if (!map[key]) map[key] = [];
       map[key].push(r);
     });
     return map;
-  }, [filtered]);
+  }, [history]);
 
   const totalAmount = useMemo(
-    () => filtered.reduce((s, r) => s + r.amount, 0),
-    [filtered]
+    () => history.reduce((s, r) => s + Number(r.amount), 0),
+    [history]
   );
 
   const handleView = (r: QRRecord) => {
-    setViewUpi(buildUPIString(r.owner_upi_id, r.owner_name, r.amount, r.note));
+    setViewUpi(buildUPIString(r.owner_upi_id, r.owner_name, Number(r.amount), r.note ?? ""));
     setViewing(r);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (!confirm("Delete this QR record?")) return;
-    deleteQRRecord(id);
-    reload();
+    try {
+      await api.delete(`/history/${id}`);
+      reload();
+    } catch (err: any) {
+      alert(err?.message ?? "Failed to delete record");
+    }
   };
 
   const FILTERS: { label: string; value: FilterMode }[] = [
@@ -90,7 +88,7 @@ export default function HistoryPage() {
   ];
 
   return (
-    <div className="px-4 py-6 space-y-5">
+    <div className="px-4 py-6 space-y-5 max-w-2xl mx-auto">
       {/* Header */}
       <div
         className="rounded-2xl px-5 py-5 text-white relative overflow-hidden"
@@ -108,7 +106,7 @@ export default function HistoryPage() {
         </div>
         <div className="flex items-baseline gap-2">
           <span className="text-2xl font-bold" style={{ fontFamily: "var(--font-sora)" }}>
-            {filtered.length}
+            {history.length}
           </span>
           <span className="text-white/60 text-sm">QRs generated</span>
           <span className="ml-auto text-emerald-300 font-bold text-lg" style={{ fontFamily: "var(--font-sora)" }}>
@@ -128,11 +126,10 @@ export default function HistoryPage() {
             <button
               key={value}
               onClick={() => setFilter(value)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                filter === value
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${filter === value
                   ? "bg-blue-600 text-white"
                   : "bg-slate-100 text-slate-500 hover:bg-blue-50 hover:text-blue-600"
-              }`}
+                }`}
             >
               {label}
             </button>
@@ -146,14 +143,22 @@ export default function HistoryPage() {
               type="date"
               value={customDate}
               onChange={(e) => setCustomDate(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-sm bg-slate-50 focus:border-blue-400 transition-colors"
+              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-sm bg-slate-50 focus:border-blue-400 transition-colors outline-none"
             />
           </div>
         )}
       </div>
 
+      {/* Loading */}
+      {loading && (
+        <div className="flex items-center justify-center py-16 gap-2 text-slate-400 text-sm">
+          <span className="w-4 h-4 border-2 border-slate-200 border-t-emerald-500 rounded-full animate-spin" />
+          Loading history...
+        </div>
+      )}
+
       {/* Empty */}
-      {filtered.length === 0 && (
+      {!loading && history.length === 0 && (
         <div className="text-center py-16">
           <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <RiQrCodeLine size={28} className="text-slate-300" />
@@ -166,9 +171,8 @@ export default function HistoryPage() {
       )}
 
       {/* Grouped records */}
-      {Object.entries(grouped).map(([date, records]) => (
+      {!loading && Object.entries(grouped).map(([date, records]) => (
         <div key={date} className="space-y-2">
-          {/* Date header */}
           <div className="flex items-center gap-2 px-1">
             <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">{date}</p>
@@ -183,10 +187,9 @@ export default function HistoryPage() {
               className="bg-white rounded-2xl p-4 border border-blue-50 shadow-sm hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group active:scale-[0.99]"
             >
               <div className="flex items-center gap-3">
-                {/* Mini QR preview */}
                 <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0 p-1.5">
                   <QRCode
-                    value={buildUPIString(r.owner_upi_id, r.owner_name, r.amount, r.note)}
+                    value={buildUPIString(r.owner_upi_id, r.owner_name, Number(r.amount), r.note ?? "")}
                     size={36}
                     fgColor="#1a3a8f"
                     bgColor="transparent"
@@ -194,26 +197,21 @@ export default function HistoryPage() {
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <p className="text-slate-800 font-semibold text-sm truncate" style={{ fontFamily: "var(--font-sora)" }}>
-                      {r.owner_name}
-                    </p>
-                  </div>
+                  <p className="text-slate-800 font-semibold text-sm truncate" style={{ fontFamily: "var(--font-sora)" }}>
+                    {r.owner_name}
+                  </p>
                   <p className="text-slate-400 text-xs font-mono truncate">{r.owner_upi_id}</p>
-                  {r.note && (
-                    <p className="text-slate-300 text-xs truncate mt-0.5">{r.note}</p>
-                  )}
+                  {r.note && <p className="text-slate-300 text-xs truncate mt-0.5">{r.note}</p>}
                 </div>
 
                 <div className="text-right flex-shrink-0">
                   <p className="text-blue-700 font-bold text-base" style={{ fontFamily: "var(--font-sora)" }}>
-                    ₹{r.amount.toLocaleString("en-IN")}
+                    ₹{Number(r.amount).toLocaleString("en-IN")}
                   </p>
-                  <p className="text-slate-300 text-[10px] mt-0.5">{formatTime(r.generatedAt)}</p>
+                  <p className="text-slate-300 text-[10px] mt-0.5">{formatTime(r.created_on)}</p>
                 </div>
               </div>
 
-              {/* Delete button - shows on hover */}
               <div
                 className="mt-3 pt-3 border-t border-slate-50 flex justify-end opacity-0 group-hover:opacity-100 transition-opacity"
                 onClick={(e) => { e.stopPropagation(); handleDelete(r.id); }}
@@ -229,7 +227,9 @@ export default function HistoryPage() {
 
       {/* QR view modal */}
       <QRDisplayModal
-        record={viewing}
+        record={viewing ? {
+          ...viewing,
+        } : null}
         upiString={viewUpi}
         onClose={() => { setViewing(null); setViewUpi(""); }}
       />

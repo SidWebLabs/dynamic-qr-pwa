@@ -1,3 +1,4 @@
+
 export interface UPIProfile {
   id: string;
   user_id: string;
@@ -11,10 +12,11 @@ export interface UPIProfile {
 
 export interface QRRecord {
   id: string;
-  upiProfileId: string;
-  owner_upi_id: string;
+  user_id: string;
+  account_id: string;
   owner_name: string;
+  owner_upi_id: string;
   amount: number;
-  note: string;
-  generatedAt: string;
+  note: string | null;
+  created_on: string; 
 }
