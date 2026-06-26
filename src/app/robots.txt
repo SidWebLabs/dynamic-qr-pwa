@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Allow: /login
+
+Disallow: /payment-qr
+Disallow: /history
+
+Sitemap: https://dynamic-qr-pwa.netlify.app/sitemap.xml

@@ -4,28 +4,28 @@ import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
+// Public routes — never redirect these, Google bot must reach them freely
 const PUBLIC_ROUTES = ["/", "/login"];
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
-  const router   = useRouter();
+  const router = useRouter();
   const pathname = usePathname();
 
   const isPublic = PUBLIC_ROUTES.includes(pathname);
 
   useEffect(() => {
     if (isLoading) return;
-    // Not logged in + trying to access protected route → kick to login
     if (!user && !isPublic) {
       router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
     }
   }, [user, isLoading, isPublic, pathname, router]);
 
-  // Show nothing while checking auth on a protected route
-  if (isLoading && !isPublic) return null;
+  // Always render public routes immediately — no loading gate
+  if (isPublic) return <>{children}</>;
 
-  // Logged-out user on protected route — render nothing while redirect fires
-  if (!isLoading && !user && !isPublic) return null;
+  // Protected route — show nothing while auth loads or redirect fires
+  if (isLoading || !user) return null;
 
   return <>{children}</>;
 }
