@@ -10,21 +10,21 @@ import InstallPWA from "@/components/InstallPWA";
 import { useAuth } from "@/context/AuthContext";
 
 const NAV = [
-  { href: "/",            label: "Home"      },
+  { href: "/", label: "Home" },
   { href: "/payment-qr", label: "Payment QR" },
-  { href: "/history",    label: "History"    },
+  { href: "/history", label: "History" },
 ];
 
 export default function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [dropOpen,   setDropOpen]   = useState(false);
+  const [dropOpen, setDropOpen] = useState(false);
   const pathname = usePathname();
-  const router   = useRouter();
+  const router = useRouter();
   const { user, logout, isLoading } = useAuth();
 
   // user.name comes from backend — safely get first char
   const avatarLetter = user?.name?.charAt(0)?.toUpperCase() ?? "U";
-  const displayName  = user?.name ?? "";
+  const displayName = user?.name ?? "";
 
   const handleLogout = () => {
     logout();
@@ -61,11 +61,10 @@ export default function Navbar() {
                   <Link
                     key={href}
                     href={href}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium no-underline transition-all ${
-                      active
+                    className={`px-4 py-2 rounded-xl text-sm font-medium no-underline transition-all ${active
                         ? "bg-blue-600 text-white"
                         : "text-white/65 hover:text-white hover:bg-white/10"
-                    }`}
+                      }`}
                   >
                     {label}
                   </Link>
@@ -134,6 +133,10 @@ export default function Navbar() {
                 <FiMenu size={22} />
               </button>
             )}
+
+            <Link href="/privacy" className="text-white hover:text-white/70 text-xs no-underline">
+              Privacy Policy
+            </Link>
           </div>
         </div>
       </header>

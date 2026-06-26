@@ -17,6 +17,8 @@ const FEATURES = [
     { icon: FiShield, label: "Data stored locally — 100% private" },
 ];
 
+const companyName = "Taginus Innovations";
+
 const CARDS = [
     {
         icon: FiZap, title: "Payment QR",
@@ -170,6 +172,14 @@ export default function Hero() {
                         </Link>
                     ))}
                 </div>
+                {/* Footer note */}
+                <p className="text-center text-slate-400 text-xs mt-10">
+                    © {new Date().getFullYear()} {companyName}. All rights reserved.
+                </p>
+
+                <p className="text-center text-slate-400 text-xs mt-2 -mb-4">
+                    Developed By <span className="text-black font-semibold">Siddhesh Kulkarni</span>
+                </p>
             </div>
         </div>
     );
