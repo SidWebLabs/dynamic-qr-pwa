@@ -4,6 +4,8 @@ import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import { AuthProvider } from "@/context/AuthContext";
 import AuthGuard from "@/components/AuthGuard";
+import { ADSENSE_CLIENT_ID } from "@/config/adsense";
+import { createMetadata, siteConfig } from "@/lib/seo/metadata";
 
 const sora = Sora({
   subsets: ["latin"],
@@ -18,12 +20,27 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "QR Pay Manager",
-  description: "Generate & manage UPI payment QR codes",
+  ...createMetadata(),
+  title: {
+    default: siteConfig.title,
+    template: `%s | ${siteConfig.name}`,
+  },
   manifest: "/manifest.json",
-  // AdSense meta tag verification — Google sees this without needing JS
+  icons: {
+    icon: "/QR_Pay.png",
+    apple: "/QR_Pay.png",
+  },
+  applicationName: siteConfig.name,
+  appleWebApp: {
+    capable: true,
+    title: siteConfig.name,
+    statusBarStyle: "black-translucent",
+  },
+  formatDetection: {
+    telephone: false,
+  },
   other: {
-    "google-adsense-account": "ca-pub-1212835646767214",
+    "google-adsense-account": ADSENSE_CLIENT_ID,
   },
 };
 
@@ -35,12 +52,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${sora.variable} ${dmSans.variable}`}>
+    <html lang="en-IN" className={`${sora.variable} ${dmSans.variable}`}>
       <head>
-        {/* Direct script tag — Google bot reads this without executing JS */}
         <script
           async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1212835646767214"
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
           // @ts-ignore
           crossOrigin="anonymous"
         />

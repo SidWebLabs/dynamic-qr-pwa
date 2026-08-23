@@ -1,11 +1,17 @@
 import Link from "next/link";
 import { FiArrowLeft, FiShield } from "react-icons/fi";
 import AdsenseAd from "@/components/AdseneseAd/AdsenseAd";
+import JsonLd from "@/components/seo/JsonLd";
+import { createMetadata, siteConfig } from "@/lib/seo/metadata";
 
-export const metadata = {
-    title: "Privacy Policy — QR Pay Manager",
-    description: "Privacy policy for QR Pay Manager UPI payment QR code generator.",
-};
+const privacyDescription =
+    "Read how QR Pay Manager collects, stores, and protects your data. Learn about local storage, Google AdSense, and your privacy rights.";
+
+export const metadata = createMetadata({
+    title: "Privacy Policy",
+    description: privacyDescription,
+    path: "/privacy",
+});
 
 export default function PrivacyPage() {
     const lastUpdated = "21 June 2026";
@@ -13,10 +19,22 @@ export default function PrivacyPage() {
     const contactPhone = "+91 9850818859";
     const companyName = "Taginus Innovations";
     const appName = "QR Pay Manager";
-    const appUrl = "https://dynamic-qr-pwa.netlify.app";
+    const appUrl = siteConfig.url;
 
     return (
         <div className="min-h-screen bg-[#f0f4ff]">
+            <JsonLd
+                data={{
+                    "@context": "https://schema.org",
+                    "@type": "WebPage",
+                    name: "Privacy Policy",
+                    url: `${appUrl}/privacy`,
+                    description: privacyDescription,
+                    isPartOf: { "@type": "WebSite", name: siteConfig.name, url: appUrl },
+                    publisher: { "@type": "Organization", name: companyName, url: appUrl },
+                    dateModified: "2026-06-21",
+                }}
+            />
             {/* Header */}
             <div
                 className="px-4 py-10 text-white relative overflow-hidden"

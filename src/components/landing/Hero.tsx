@@ -80,14 +80,13 @@ export default function Hero() {
                         className="text-center text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-[1.1] mb-5 tracking-tight"
                         style={{ fontFamily: "var(--font-sora)" }}
                     >
-                        We make{" "}
+                        UPI Payment{" "}
                         <span
                             className="text-transparent bg-clip-text"
                             style={{ backgroundImage: "linear-gradient(90deg,#60a5fa 0%,#a5b4fc 100%)" }}
                         >
-                            QR Codes
+                            QR Generator
                         </span>
-                        <br className="hidden sm:block" />{" "}easy
                     </h1>
 
                     {/* Subtext */}
@@ -179,6 +178,10 @@ export default function Hero() {
 
                 <p className="text-center text-slate-400 text-xs mt-2 -mb-4">
                     Developed By <span className="text-black font-semibold">Siddhesh Kulkarni</span>
+                    {" · "}
+                    <Link href="/privacy" className="text-slate-500 hover:text-slate-700 no-underline">
+                        Privacy Policy
+                    </Link>
                 </p>
             </div>
         </div>

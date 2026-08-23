@@ -40,7 +40,7 @@ export default function Navbar() {
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-10 py-3.5">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 no-underline flex-shrink-0">
+          <Link href="/" className="flex items-center gap-2.5 no-underline flex-shrink-0" aria-label="QR Pay Manager home">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <RiQrCodeLine size={18} color="white" />
             </div>
@@ -54,7 +54,7 @@ export default function Navbar() {
 
           {/* Desktop nav — only when logged in */}
           {user && (
-            <nav className="hidden lg:flex items-center gap-1">
+            <nav className="hidden lg:flex items-center gap-1" aria-label="Main navigation">
               {NAV.map(({ href, label }) => {
                 const active = pathname === href;
                 return (
