@@ -65,7 +65,7 @@ export default function PrivacyPage() {
 
             {/* Ad — top */}
             <div className="max-w-3xl mx-auto px-4 pt-6">
-                <AdsenseAd format="horizontal" />
+                <AdsenseAd format="auto" />
             </div>
 
             {/* Content */}
@@ -271,7 +271,7 @@ export default function PrivacyPage() {
                 ))}
 
                 {/* Ad — bottom */}
-                <AdsenseAd format="rectangle" />
+                <AdsenseAd format="auto" />
 
                 {/* Footer note */}
                 <p className="text-center text-slate-400 text-xs -mb-4">

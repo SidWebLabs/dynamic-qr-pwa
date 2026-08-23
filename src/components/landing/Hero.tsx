@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FiZap, FiClock, FiShield, FiArrowRight } from "react-icons/fi";
 import { RiQrCodeLine } from "react-icons/ri";
 import { useAuth } from "@/context/AuthContext";
+import AdsenseAd from "@/components/AdseneseAd/AdsenseAd";
 
 const STATS = [
     { val: "UPI", sub: "Payment QR" },
@@ -171,6 +172,11 @@ export default function Hero() {
                         </Link>
                     ))}
                 </div>
+
+                <div className="max-w-5xl mx-auto mt-8">
+                    <AdsenseAd format="auto" />
+                </div>
+
                 {/* Footer note */}
                 <p className="text-center text-slate-400 text-xs mt-10">
                     © {new Date().getFullYear()} {companyName}. All rights reserved.
