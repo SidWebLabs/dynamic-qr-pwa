@@ -63,11 +63,6 @@ export default function PrivacyPage() {
                 </div>
             </div>
 
-            {/* Ad — top */}
-            <div className="max-w-3xl mx-auto px-4 pt-6">
-                <AdsenseAd format="auto" />
-            </div>
-
             {/* Content */}
             <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
 
@@ -272,16 +267,20 @@ export default function PrivacyPage() {
 
                 {/* Ad — bottom */}
                 <AdsenseAd format="auto" />
+            </div>
 
-                {/* Footer note */}
-                <p className="text-center text-slate-400 text-xs -mb-4">
+            <footer className="max-w-3xl mx-auto px-4 pb-10 pt-4">
+                <p className="text-center text-slate-400 text-xs">
                     © {new Date().getFullYear()} {companyName}. All rights reserved.
                 </p>
-
-                 <p className="text-center text-slate-400 text-xs -mt-4">
+                <p className="text-center text-slate-400 text-xs mt-2">
                     Developed By <span className="text-black font-semibold">Siddhesh Kulkarni</span>
+                    {" · "}
+                    <Link href="/" className="text-slate-500 hover:text-slate-700 no-underline">
+                        Home
+                    </Link>
                 </p>
-            </div>
+            </footer>
         </div>
     );
 }
