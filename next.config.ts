@@ -10,6 +10,9 @@ const withPWA = withPWAInit({
 
 const nextConfig = {
   reactStrictMode: true,
+  // next-pwa injects webpack config; Next 16 needs this acknowledged
+  // Build/dev scripts use --webpack explicitly.
+  turbopack: {},
 };
 
 export default withPWA(nextConfig);
