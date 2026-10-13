@@ -1,24 +1,27 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { FiPlus, FiEdit2, FiTrash2, FiZap, FiChevronDown, FiStar } from "react-icons/fi";
 import { RiQrCodeLine } from "react-icons/ri";
-import { UPIProfile, QRRecord } from "@/types/index";
+import { UPIProfile, QRRecord, SplitPaymentRecord } from "@/types/index";
 import { buildUPIString } from "@/lib/storage";
 import { api } from "@/lib/api";
+import { shouldSplitAmount, getSplitHint, SPLIT_MIN_EXCLUSIVE, SPLIT_MAX_EXCLUSIVE } from "@/lib/splitPayment";
 import { useAuth } from "@/context/AuthContext";
+import { useAccounts } from "@/context/AccountsContext";
 import UPIProfileModal from "@/components/ui/UPIProfileModal";
 import QRDisplayModal from "@/components/ui/QRDisplayModal";
+import SplitQRDisplayModal from "@/components/ui/SplitQRDisplayModal";
+import AmountInput from "@/components/ui/AmountInput";
 
 export default function PaymentQRPage() {
   const { user } = useAuth();
+  const { accounts: profiles, isLoading: loading, refreshAccounts } = useAccounts();
 
-  const [profiles, setProfiles] = useState<UPIProfile[]>([]);
   const [selectedId, setSelectedId] = useState<string>("");
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [amountError, setAmountError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -26,32 +29,31 @@ export default function PaymentQRPage() {
 
   const [qrRecord, setQrRecord] = useState<QRRecord | null>(null);
   const [qrString, setQrString] = useState("");
+  const [splitRecord, setSplitRecord] = useState<SplitPaymentRecord | null>(null);
 
-  const reload = useCallback(async () => {
-    try {
-      setLoading(true);
-      const res = await api.get<UPIProfile[]>("/accounts");
-      const list = res.data ?? [];
-      setProfiles(list);
-      if (list.length > 0 && !selectedId) {
-        const primary = list.find((p) => p.is_primary) ?? list[0];
-        setSelectedId(String(primary.id));
-      }
-    } catch (err) {
-      console.error("Failed to load accounts", err);
-    } finally {
-      setLoading(false);
+  // Keep selection in sync with cached accounts (no refetch on revisit)
+  useEffect(() => {
+    if (profiles.length === 0) {
+      setSelectedId("");
+      return;
     }
-  }, [selectedId]);
-
-  useEffect(() => { reload(); }, []);
+    const stillValid = profiles.some((p) => String(p.id) === selectedId);
+    if (!stillValid) {
+      const primary = profiles.find((p) => p.is_primary) ?? profiles[0];
+      setSelectedId(String(primary.id));
+    }
+  }, [profiles, selectedId]);
 
   const selectedProfile = profiles.find((p) => String(p.id) === selectedId);
 
   const handleGenerate = async () => {
-    const val = parseFloat(amount);
+    const val = parseInt(amount, 10);
     if (!amount || isNaN(val) || val <= 0) {
-      setAmountError("Enter a valid amount greater than ₹0");
+      setAmountError("Enter a valid whole amount greater than ₹0");
+      return;
+    }
+    if (!/^\d+$/.test(amount) || amount.includes(".") || amount.includes(",")) {
+      setAmountError("Decimal / point values are not allowed. Enter whole rupees only.");
       return;
     }
     if (!selectedProfile) {
@@ -63,17 +65,27 @@ export default function PaymentQRPage() {
     setAmountError(null);
 
     try {
-      const res = await api.post<QRRecord>("/history", {
-        account_id: Number(selectedProfile.id),
-        amount: val,
-        note: note.trim(),
-      });
+      if (shouldSplitAmount(val)) {
+        const res = await api.post<SplitPaymentRecord>("/split-payments", {
+          account_id: Number(selectedProfile.id),
+          amount: val,
+          note: note.trim(),
+        });
+        setSplitRecord(res.data!);
+      } else {
+        const res = await api.post<QRRecord>("/history", {
+          account_id: Number(selectedProfile.id),
+          amount: val,
+          note: note.trim(),
+        });
 
-      const record = res.data!;
-      const upiStr = buildUPIString(record.owner_upi_id, record.owner_name, val, note.trim());
+        const record = res.data!;
+        const upiStr = buildUPIString(record.owner_upi_id, record.owner_name, val, note.trim());
 
-      setQrString(upiStr);
-      setQrRecord(record);
+        setQrString(upiStr);
+        setQrRecord(record);
+      }
+
       setAmount("");
       setNote("");
     } catch (err: any) {
@@ -83,22 +95,25 @@ export default function PaymentQRPage() {
     }
   };
 
+  const amountNum = parseInt(amount, 10);
+  const splitHint =
+    amount && /^\d+$/.test(amount) && !isNaN(amountNum) ? getSplitHint(amountNum) : null;
+
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this UPI account?")) return;
     try {
       await api.delete(`/accounts/${id}`);
       if (selectedId === id) setSelectedId("");
-      await reload();
+      await refreshAccounts();
     } catch (err: any) {
       alert(err?.message ?? "Failed to delete account");
     }
   };
 
-  // ── Set primary via API ───────────────────────────────────
   const handleSetPrimary = async (id: string) => {
     try {
       await api.patch(`/accounts/${id}/primary`);
-      await reload();
+      await refreshAccounts();
     } catch (err: any) {
       alert(err?.message ?? "Failed to set primary");
     }
@@ -284,19 +299,25 @@ export default function PaymentQRPage() {
         </p>
 
         <div className="mb-4">
-          <label className="block text-xs font-medium text-slate-500 mb-1.5">Amount (₹)</label>
-          <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-sm">₹</span>
-            <input
-              type="number"
-              inputMode="decimal"
-              placeholder="0.00"
-              value={amount}
-              onChange={(e) => { setAmount(e.target.value); setAmountError(null); }}
-              className="w-full pl-8 pr-4 py-3 rounded-xl border border-slate-200 text-slate-800 text-sm bg-slate-50 focus:border-blue-400 focus:bg-white transition-colors outline-none font-semibold"
-            />
-          </div>
+          <label className="block text-xs font-medium text-slate-500 mb-1.5">Amount (₹) — whole rupees only</label>
+          <AmountInput
+            value={amount}
+            onChange={setAmount}
+            onError={setAmountError}
+            placeholder="e.g. 500"
+            focusClassName="focus:border-blue-400"
+          />
           {amountError && <p className="text-red-500 text-xs mt-1.5">{amountError}</p>}
+          {splitHint && (
+            <p className="text-amber-600 text-xs mt-1.5 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+              {splitHint}
+            </p>
+          )}
+          {!splitHint && amount && /^\d+$/.test(amount) && !isNaN(amountNum) && amountNum >= SPLIT_MAX_EXCLUSIVE && (
+            <p className="text-slate-400 text-xs mt-1.5">
+              Amounts ₹{SPLIT_MAX_EXCLUSIVE}+ generate a single QR (split is only for ₹{SPLIT_MIN_EXCLUSIVE + 1}–₹{SPLIT_MAX_EXCLUSIVE - 1}).
+            </p>
+          )}
         </div>
 
         <div className="mb-5">
@@ -323,7 +344,7 @@ export default function PaymentQRPage() {
           ) : (
             <>
               <FiZap size={16} />
-              Generate QR Code
+              {splitHint ? "Generate Split QR Codes" : "Generate QR Code"}
             </>
           )}
         </button>
@@ -333,7 +354,7 @@ export default function PaymentQRPage() {
       <UPIProfileModal
         open={modalOpen}
         onClose={() => { setModalOpen(false); setEditing(null); }}
-        onSaved={reload}
+        onSaved={refreshAccounts}
         editing={editing}
         accountCount={profiles.length}
         maxLimit={maxLimit}
@@ -343,6 +364,11 @@ export default function PaymentQRPage() {
         record={qrRecord}
         upiString={qrString}
         onClose={() => { setQrRecord(null); setQrString(""); }}
+      />
+
+      <SplitQRDisplayModal
+        record={splitRecord}
+        onClose={() => setSplitRecord(null)}
       />
     </div>
   );

@@ -3,6 +3,7 @@ import { Sora, DM_Sans } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import { AuthProvider } from "@/context/AuthContext";
+import { AccountsProvider } from "@/context/AccountsContext";
 import AuthGuard from "@/components/AuthGuard";
 import { ADSENSE_CLIENT_ID } from "@/config/adsense";
 import { createMetadata, siteConfig } from "@/lib/seo/metadata";
@@ -67,10 +68,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         style={{ fontFamily: "var(--font-dm), sans-serif" }}
       >
         <AuthProvider>
-          <AuthGuard>
-            <Navbar />
-            <main>{children}</main>
-          </AuthGuard>
+          <AccountsProvider>
+            <AuthGuard>
+              <Navbar />
+              <main>{children}</main>
+            </AuthGuard>
+          </AccountsProvider>
         </AuthProvider>
       </body>
     </html>

@@ -4,6 +4,7 @@ Allow: /login
 Allow: /privacy
 
 Disallow: /payment-qr
+Disallow: /split-payment
 Disallow: /history
 
 Sitemap: https://dynamic-qr-pwa.netlify.app/sitemap.xml

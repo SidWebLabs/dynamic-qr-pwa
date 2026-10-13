@@ -106,6 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
 
     // ── Logout ────────────────────────────────────────────────
+    // AccountsContext watches user/token and clears its cache automatically
     const logout = useCallback(() => {
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(SESSION_KEY);

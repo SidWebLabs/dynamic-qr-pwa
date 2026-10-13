@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FiX, FiHome, FiZap, FiClock } from "react-icons/fi";
+import { FiX, FiHome, FiZap, FiClock, FiLayers } from "react-icons/fi";
 import { RiQrCodeLine } from "react-icons/ri";
 
 interface DrawerProps { open: boolean; onClose: () => void; }
@@ -11,6 +11,7 @@ interface DrawerProps { open: boolean; onClose: () => void; }
 const NAV = [
     { href: "/", label: "Home", icon: FiHome },
     { href: "/payment-qr", label: "Payment QR", icon: FiZap },
+    { href: "/split-payment", label: "Split Payment", icon: FiLayers, badge: "NEW" },
     { href: "/history", label: "History", icon: FiClock },
 ];
 
@@ -60,21 +61,40 @@ export default function Drawer({ open, onClose }: DrawerProps) {
                 </div>
 
                 <nav className="flex-1 px-4 py-6 flex flex-col gap-1">
-                    {NAV.map(({ href, label, icon: Icon }) => {
+                    {NAV.map(({ href, label, icon: Icon, badge }) => {
                         const active = pathname === href;
+                        const isSplit = href === "/split-payment";
                         return (
                             <Link
                                 key={href}
                                 href={href}
                                 onClick={onClose}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all no-underline ${active
-                                        ? "bg-blue-600 text-white shadow-lg shadow-blue-900/40"
-                                        : "text-white/65 hover:text-white hover:bg-white/10"
-                                    }`}
+                                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all no-underline ${
+                                    active
+                                        ? isSplit
+                                            ? "bg-amber-500 text-white shadow-lg shadow-amber-900/40"
+                                            : "bg-blue-600 text-white shadow-lg shadow-blue-900/40"
+                                        : isSplit
+                                            ? "text-amber-200 hover:text-white hover:bg-amber-500/20 ring-1 ring-inset ring-amber-400/30"
+                                            : "text-white/65 hover:text-white hover:bg-white/10"
+                                }`}
                             >
                                 <Icon size={18} />
-                                {label}
-                                {active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-white" />}
+                                <span className="flex-1">{label}</span>
+                                {badge && (
+                                    <span
+                                        className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full tracking-wide ${
+                                            active
+                                                ? "bg-white text-amber-600"
+                                                : "bg-amber-400 text-amber-950"
+                                        }`}
+                                    >
+                                        {badge}
+                                    </span>
+                                )}
+                                {active && !badge && (
+                                    <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                                )}
                             </Link>
                         );
                     })}
