@@ -3,15 +3,13 @@
 import { useState, useEffect } from "react";
 import { FiPlus, FiEdit2, FiTrash2, FiZap, FiChevronDown, FiStar } from "react-icons/fi";
 import { RiQrCodeLine } from "react-icons/ri";
-import { UPIProfile, QRRecord, SplitPaymentRecord } from "@/types/index";
+import { UPIProfile, QRRecord } from "@/types/index";
 import { buildUPIString } from "@/lib/storage";
 import { api } from "@/lib/api";
-import { shouldSplitAmount, getSplitHint, SPLIT_MIN_EXCLUSIVE, SPLIT_MAX_EXCLUSIVE } from "@/lib/splitPayment";
 import { useAuth } from "@/context/AuthContext";
 import { useAccounts } from "@/context/AccountsContext";
 import UPIProfileModal from "@/components/ui/UPIProfileModal";
 import QRDisplayModal from "@/components/ui/QRDisplayModal";
-import SplitQRDisplayModal from "@/components/ui/SplitQRDisplayModal";
 import AmountInput from "@/components/ui/AmountInput";
 
 export default function PaymentQRPage() {
@@ -29,7 +27,6 @@ export default function PaymentQRPage() {
 
   const [qrRecord, setQrRecord] = useState<QRRecord | null>(null);
   const [qrString, setQrString] = useState("");
-  const [splitRecord, setSplitRecord] = useState<SplitPaymentRecord | null>(null);
 
   // Keep selection in sync with cached accounts (no refetch on revisit)
   useEffect(() => {
@@ -65,27 +62,17 @@ export default function PaymentQRPage() {
     setAmountError(null);
 
     try {
-      if (shouldSplitAmount(val)) {
-        const res = await api.post<SplitPaymentRecord>("/split-payments", {
-          account_id: Number(selectedProfile.id),
-          amount: val,
-          note: note.trim(),
-        });
-        setSplitRecord(res.data!);
-      } else {
-        const res = await api.post<QRRecord>("/history", {
-          account_id: Number(selectedProfile.id),
-          amount: val,
-          note: note.trim(),
-        });
+      const res = await api.post<QRRecord>("/history", {
+        account_id: Number(selectedProfile.id),
+        amount: val,
+        note: note.trim(),
+      });
 
-        const record = res.data!;
-        const upiStr = buildUPIString(record.owner_upi_id, record.owner_name, val, note.trim());
+      const record = res.data!;
+      const upiStr = buildUPIString(record.owner_upi_id, record.owner_name, val, note.trim());
 
-        setQrString(upiStr);
-        setQrRecord(record);
-      }
-
+      setQrString(upiStr);
+      setQrRecord(record);
       setAmount("");
       setNote("");
     } catch (err: any) {
@@ -94,10 +81,6 @@ export default function PaymentQRPage() {
       setGenerating(false);
     }
   };
-
-  const amountNum = parseInt(amount, 10);
-  const splitHint =
-    amount && /^\d+$/.test(amount) && !isNaN(amountNum) ? getSplitHint(amountNum) : null;
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this UPI account?")) return;
@@ -308,16 +291,6 @@ export default function PaymentQRPage() {
             focusClassName="focus:border-amber-400"
           />
           {amountError && <p className="text-red-500 text-xs mt-1.5">{amountError}</p>}
-          {splitHint && (
-            <p className="text-amber-700 text-xs mt-1.5 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
-              {splitHint}
-            </p>
-          )}
-          {!splitHint && amount && /^\d+$/.test(amount) && !isNaN(amountNum) && amountNum >= SPLIT_MAX_EXCLUSIVE && (
-            <p className="text-slate-400 text-xs mt-1.5">
-              Amounts ₹{SPLIT_MAX_EXCLUSIVE}+ generate a single QR (split is only for ₹{SPLIT_MIN_EXCLUSIVE + 1}–₹{SPLIT_MAX_EXCLUSIVE - 1}).
-            </p>
-          )}
         </div>
 
         <div className="mb-5">
@@ -344,7 +317,7 @@ export default function PaymentQRPage() {
           ) : (
             <>
               <FiZap size={16} />
-              {splitHint ? "Generate Split QR Codes" : "Generate QR Code"}
+              Generate QR Code
             </>
           )}
         </button>
@@ -364,11 +337,6 @@ export default function PaymentQRPage() {
         record={qrRecord}
         upiString={qrString}
         onClose={() => { setQrRecord(null); setQrString(""); }}
-      />
-
-      <SplitQRDisplayModal
-        record={splitRecord}
-        onClose={() => setSplitRecord(null)}
       />
     </div>
   );
