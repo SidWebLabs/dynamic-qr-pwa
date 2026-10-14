@@ -12,7 +12,7 @@ import { useAuth } from "@/context/AuthContext";
 const NAV = [
   { href: "/", label: "Home" },
   { href: "/payment-qr", label: "Payment QR" },
-  { href: "/split-payment", label: "Split Payment", badge: "NEW" },
+  // { href: "/split-payment", label: "Split Payment", badge: "NEW" },
   { href: "/history", label: "History" },
 ];
 
@@ -56,35 +56,19 @@ export default function Navbar() {
           {/* Desktop nav — only when logged in */}
           {user && (
             <nav className="hidden lg:flex items-center gap-1" aria-label="Main navigation">
-              {NAV.map(({ href, label, badge }) => {
+              {NAV.map(({ href, label }) => {
                 const active = pathname === href;
-                const isSplit = href === "/split-payment";
                 return (
                   <Link
                     key={href}
                     href={href}
                     className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium no-underline transition-all ${
                       active
-                        ? isSplit
-                          ? "bg-amber-500 text-white shadow-lg shadow-amber-900/30"
-                          : "bg-blue-600 text-white"
-                        : isSplit
-                          ? "text-amber-200 hover:text-white hover:bg-amber-500/20 ring-1 ring-amber-400/40"
-                          : "text-white/65 hover:text-white hover:bg-white/10"
+                        ? "bg-amber-500 text-white shadow-lg shadow-amber-900/30"
+                        : "text-white/65 hover:text-white hover:bg-white/10"
                     }`}
                   >
                     {label}
-                    {badge && (
-                      <span
-                        className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full tracking-wide ${
-                          active
-                            ? "bg-white text-amber-600"
-                            : "bg-amber-400 text-amber-950"
-                        }`}
-                      >
-                        {badge}
-                      </span>
-                    )}
                   </Link>
                 );
               })}

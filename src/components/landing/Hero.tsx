@@ -22,13 +22,13 @@ const CARDS = [
         icon: FiZap, title: "Payment QR",
         desc: "Add UPI IDs with name and label. Select from dropdown, enter amount and generate instantly.",
         authHref: "/payment-qr", guestHref: "/login",
-        color: "text-blue-600", bg: "bg-blue-50", border: "hover:border-blue-200",
+        color: "text-amber-600", bg: "bg-amber-50", border: "hover:border-amber-200",
     },
     {
         icon: FiClock, title: "QR History",
         desc: "All generated QRs saved locally. Filter by today, this week or any date. Re-view and share.",
         authHref: "/history", guestHref: "/login",
-        color: "text-emerald-600", bg: "bg-emerald-50", border: "hover:border-emerald-200",
+        color: "text-amber-600", bg: "bg-amber-50", border: "hover:border-amber-200",
     },
     {
         icon: FiShield, title: "Secure & Offline",

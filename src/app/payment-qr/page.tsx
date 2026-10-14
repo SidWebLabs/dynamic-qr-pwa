@@ -126,7 +126,7 @@ export default function PaymentQRPage() {
       {/* Header strip */}
       <div
         className="rounded-2xl px-5 py-5 text-white relative overflow-hidden"
-        style={{ background: "linear-gradient(135deg,#0e2060 0%,#1a3a8f 100%)" }}
+        style={{ background: "linear-gradient(135deg,#7c2d12 0%,#b45309 50%,#d97706 100%)" }}
       >
         <div className="absolute right-0 top-0 w-32 h-32 rounded-full opacity-10 bg-white"
           style={{ transform: "translate(30%,-30%)" }} />
@@ -136,11 +136,11 @@ export default function PaymentQRPage() {
             Payment QR Generator
           </span>
         </div>
-        <p className="text-white/60 text-xs">Select a UPI account and enter amount to generate QR</p>
+        <p className="text-white/70 text-xs">Select a UPI account and enter amount to generate QR</p>
       </div>
 
       {/* UPI Account selector */}
-      <div className="bg-white rounded-2xl p-5 border border-blue-50 shadow-sm">
+      <div className="bg-white rounded-2xl p-5 border border-amber-50 shadow-sm">
         <div className="flex items-center justify-between mb-3">
           <div>
             <p className="text-slate-700 font-semibold text-sm" style={{ fontFamily: "var(--font-sora)" }}>
@@ -150,7 +150,7 @@ export default function PaymentQRPage() {
           </div>
           <button
             onClick={() => { setEditing(null); setModalOpen(true); }}
-            className="flex items-center gap-1.5 text-blue-600 text-xs font-semibold bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors"
+            className="flex items-center gap-1.5 text-amber-700 text-xs font-semibold bg-amber-50 px-3 py-1.5 rounded-lg hover:bg-amber-100 transition-colors"
           >
             <FiPlus size={13} /> Add New
           </button>
@@ -158,7 +158,7 @@ export default function PaymentQRPage() {
 
         {loading ? (
           <div className="flex items-center justify-center py-8 gap-2 text-slate-400 text-sm">
-            <span className="w-4 h-4 border-2 border-slate-200 border-t-blue-500 rounded-full animate-spin" />
+            <span className="w-4 h-4 border-2 border-slate-200 border-t-amber-500 rounded-full animate-spin" />
             Loading accounts...
           </div>
         ) : profiles.length === 0 ? (
@@ -167,7 +167,7 @@ export default function PaymentQRPage() {
               <RiQrCodeLine size={22} className="text-slate-300" />
             </div>
             <p className="text-slate-400 text-sm">No UPI accounts yet</p>
-            <p className="text-slate-300 text-xs mt-1">Tap "Add New" to get started</p>
+            <p className="text-slate-300 text-xs mt-1">Tap &quot;Add New&quot; to get started</p>
           </div>
         ) : (
           <>
@@ -175,7 +175,7 @@ export default function PaymentQRPage() {
               <select
                 value={selectedId}
                 onChange={(e) => setSelectedId(e.target.value)}
-                className="w-full px-4 py-3 pr-10 rounded-xl border border-slate-200 text-slate-800 text-sm bg-slate-50 appearance-none focus:border-blue-400 focus:bg-white transition-colors outline-none"
+                className="w-full px-4 py-3 pr-10 rounded-xl border border-slate-200 text-slate-800 text-sm bg-slate-50 appearance-none focus:border-amber-400 focus:bg-white transition-colors outline-none"
               >
                 {profiles.map((p) => (
                   <option key={p.id} value={String(p.id)}>
@@ -187,31 +187,31 @@ export default function PaymentQRPage() {
             </div>
 
             {selectedProfile && (
-              <div className="bg-blue-50 rounded-xl px-4 py-3 flex items-center justify-between">
+              <div className="bg-amber-50 rounded-xl px-4 py-3 flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-2">
-                    <p className="text-blue-800 font-semibold text-sm">{selectedProfile.owner_name}</p>
+                    <p className="text-amber-900 font-semibold text-sm">{selectedProfile.owner_name}</p>
                     {selectedProfile.is_primary && (
-                      <span className="text-[10px] bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded-full font-semibold flex items-center gap-0.5">
+                      <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-semibold flex items-center gap-0.5">
                         <FiStar size={9} /> Primary
                       </span>
                     )}
                   </div>
-                  <p className="text-blue-500 text-xs font-mono mt-0.5">{selectedProfile.owner_upi_id}</p>
+                  <p className="text-amber-600 text-xs font-mono mt-0.5">{selectedProfile.owner_upi_id}</p>
                 </div>
                 <div className="flex gap-1.5">
                   {!selectedProfile.is_primary && (
                     <button
                       onClick={() => handleSetPrimary(String(selectedProfile.id))}
                       title="Set as primary"
-                      className="p-2 text-amber-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                      className="p-2 text-amber-400 hover:text-amber-600 hover:bg-amber-100 rounded-lg transition-colors"
                     >
                       <FiStar size={14} />
                     </button>
                   )}
                   <button
                     onClick={() => { setEditing(selectedProfile); setModalOpen(true); }}
-                    className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-100 rounded-lg transition-colors"
+                    className="p-2 text-amber-600 hover:text-amber-800 hover:bg-amber-100 rounded-lg transition-colors"
                   >
                     <FiEdit2 size={14} />
                   </button>
@@ -230,7 +230,7 @@ export default function PaymentQRPage() {
 
       {/* All accounts list */}
       {profiles.length > 1 && (
-        <div className="bg-white rounded-2xl p-5 border border-blue-50 shadow-sm">
+        <div className="bg-white rounded-2xl p-5 border border-amber-50 shadow-sm">
           <p className="text-slate-400 text-xs font-semibold uppercase tracking-wide mb-3">All UPI Accounts</p>
           <div className="space-y-2">
             {profiles.map((p) => {
@@ -240,8 +240,8 @@ export default function PaymentQRPage() {
                   key={p.id}
                   onClick={() => setSelectedId(String(p.id))}
                   className={`flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-all ${active
-                    ? "bg-blue-600 text-white"
-                    : "bg-slate-50 hover:bg-blue-50 border border-transparent hover:border-blue-100"
+                    ? "bg-amber-600 text-white"
+                    : "bg-slate-50 hover:bg-amber-50 border border-transparent hover:border-amber-100"
                     }`}
                 >
                   <div className="min-w-0">
@@ -250,13 +250,13 @@ export default function PaymentQRPage() {
                         {p.owner_name}
                       </p>
                       {p.is_primary && (
-                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-semibold flex-shrink-0 ${active ? "bg-white/20 text-white" : "bg-amber-100 text-amber-600"
+                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-semibold flex-shrink-0 ${active ? "bg-white/20 text-white" : "bg-amber-100 text-amber-700"
                           }`}>
                           Primary
                         </span>
                       )}
                     </div>
-                    <p className={`text-xs font-mono mt-0.5 truncate ${active ? "text-blue-200" : "text-slate-400"}`}>
+                    <p className={`text-xs font-mono mt-0.5 truncate ${active ? "text-amber-100" : "text-slate-400"}`}>
                       {p.owner_upi_id}
                     </p>
                   </div>
@@ -272,7 +272,7 @@ export default function PaymentQRPage() {
                     )}
                     <button
                       onClick={() => { setEditing(p); setModalOpen(true); }}
-                      className={`p-1.5 rounded-lg transition-colors ${active ? "text-white/70 hover:text-white hover:bg-white/20" : "text-slate-400 hover:text-blue-600 hover:bg-blue-50"
+                      className={`p-1.5 rounded-lg transition-colors ${active ? "text-white/70 hover:text-white hover:bg-white/20" : "text-slate-400 hover:text-amber-700 hover:bg-amber-50"
                         }`}
                     >
                       <FiEdit2 size={13} />
@@ -293,7 +293,7 @@ export default function PaymentQRPage() {
       )}
 
       {/* Amount & Note */}
-      <div className="bg-white rounded-2xl p-5 border border-blue-50 shadow-sm">
+      <div className="bg-white rounded-2xl p-5 border border-amber-50 shadow-sm">
         <p className="text-slate-700 font-semibold text-sm mb-4" style={{ fontFamily: "var(--font-sora)" }}>
           Payment Details
         </p>
@@ -305,11 +305,11 @@ export default function PaymentQRPage() {
             onChange={setAmount}
             onError={setAmountError}
             placeholder="e.g. 500"
-            focusClassName="focus:border-blue-400"
+            focusClassName="focus:border-amber-400"
           />
           {amountError && <p className="text-red-500 text-xs mt-1.5">{amountError}</p>}
           {splitHint && (
-            <p className="text-amber-600 text-xs mt-1.5 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+            <p className="text-amber-700 text-xs mt-1.5 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
               {splitHint}
             </p>
           )}
@@ -327,14 +327,14 @@ export default function PaymentQRPage() {
             placeholder="e.g. Rent, Groceries..."
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-800 text-sm bg-slate-50 focus:border-blue-400 focus:bg-white transition-colors outline-none"
+            className="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-800 text-sm bg-slate-50 focus:border-amber-400 focus:bg-white transition-colors outline-none"
           />
         </div>
 
         <button
           onClick={handleGenerate}
           disabled={!selectedProfile || !amount || generating}
-          className="w-full bg-blue-600 text-white font-semibold py-4 rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-blue-500 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-blue-200"
+          className="w-full bg-amber-600 text-white font-semibold py-4 rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-amber-500 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-amber-200"
         >
           {generating ? (
             <>
